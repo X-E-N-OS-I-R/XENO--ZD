@@ -43,6 +43,7 @@
     "description": "private or public",
       "required": "true",
       "value": "public"
+    }
     },
       "addons": [{
       "plan": "heroku-postgresql"
