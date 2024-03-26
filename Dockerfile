@@ -15,4 +15,4 @@ RUN yarn install
 
 COPY . .
 
-CMD ["npm", "install -g npm@10.5.0", "start"]
+CMD ["npm", "start"]
