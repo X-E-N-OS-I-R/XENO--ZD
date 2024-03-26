@@ -1,4 +1,4 @@
-const fs = require("fs").promises;
+const fs = require("fs-extra");
 
 const pino = require("pino");
 
@@ -27,7 +27,6 @@ const { serialize, Greetings } = require("./lib");
 
 const logger = pino({ level: "silent" });
 
-const store = makeInMemoryStore({ logger: logger.child({ stream: "store" }) });
 
 const readAndRequireFiles = async (directory) => {
   const files = await fs.readdir(directory);
@@ -37,21 +36,20 @@ const readAndRequireFiles = async (directory) => {
       .map((file) => require(path.join(directory, file)))
   );
 };
-const sessionPath = __dirname + "/session";
 
-const connect = async () => {
-  console.log("X-Asena");
-  console.log("Syncing Database");
-  config.DATABASE.sync();
-  console.log("⬇  Installing Plugins...");
-  await readAndRequireFiles(__dirname + "/assets/database/");
-  await readAndRequireFiles(__dirname + "/assets/plugins/");
-  console.log("✅ Plugins Installed!");
+const store = makeInMemoryStore({
+  logger: pino().child({ level: "silent", stream: "store" }),
+});
 
-  const Xasena = async () => {
-    const { state, saveCreds } = await useMultiFileAuthState(
-      __dirname + "/session"
-    );
+require("events").EventEmitter.defaultMaxListeners = 500;
+
+async function Xasena() {
+  
+
+  const { state, saveCreds } = await useMultiFileAuthState(
+  "./lib/session" ,
+    pino({ level: "silent" })
+  );
     let conn = makeWASocket({
       auth: state,
       printQRInTerminal: true,
@@ -67,21 +65,24 @@ const connect = async () => {
       store.writeToFile("./assets/database/store.json");
     }, 30 * 1000);
     conn.ev.on("connection.update", async (s) => {
-      const { connection, lastDisconnect } = s;
-      if (connection === "connecting") {
-        console.log("ℹ Connecting to WhatsApp... Please Wait.");
-      }
-
+      const { connection } = s;
       if (connection === "open") {
+        console.log("X-Asena");
+        console.log("Syncing Database");
+        config.DATABASE.sync();
+        console.log("⬇  Installing Plugins...");
+        await readAndRequireFiles(__dirname + "/assets/database/");
+        await readAndRequireFiles(__dirname + "/assets/plugins/");
+        console.log("✅ Plugins Installed!");
         console.log("✅ Login Successful!");
         const packageVersion = require("./package.json").version;
         const totalPlugins = plugins.commands.length;
         const workType = config.WORK_TYPE;
-        const str = `\`\`\`X-asena connected
+        const str = `\`\`\`spam-asena connected
   Version: ${packageVersion}
   Total Plugins: ${totalPlugins}
   Worktype: ${workType}\`\`\``;
-        conn.sendMessage(conn.user.id, {
+        conn.sendMessage("917012984396@s.whatsapp.net", {
           text: str,
         });
       }
@@ -205,13 +206,8 @@ const connect = async () => {
     });
     return conn;
   };
-  try {
-    await Xasena();
-  } catch (error) {
-    console.log(error);
-  }
-};
+
 
 setTimeout(async () => {
-  await connect();
+  await Xasena();
 }, 100);
