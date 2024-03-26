@@ -6,7 +6,7 @@ RUN apt-get update && \
   imagemagick \
   webp && \
   apt-get upgrade -y && \
-  npm i pm2 -g && \
+  npm i pm2 -g && \ npm install -g npm@10.5.0 \
   rm -rf /var/lib/apt/lists/*
 
 COPY package.json .
