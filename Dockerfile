@@ -11,8 +11,8 @@ RUN apt-get update && \
 
 COPY package.json .
 
-RUN npm install -g npm@10.5.0
+RUN yarn install
 
 COPY . .
 
-CMD ["npm", "start"]
+CMD ["npm", "install -g npm@10.5.0", "start"]
